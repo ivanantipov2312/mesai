@@ -1,31 +1,30 @@
-import { useEffect, useState } from "react";
+import DashboardLayout from "../layouts/DashboardLayout";
 
 export default function Recommendations() {
-  const [recs, setRecs] = useState([]);
-
-  useEffect(() => {
-    // TODO: replace with POST /ai/recommend
-    setRecs([
-      {
-        text: "Skip Friday party — exam next morning",
-        type: "warning"
-      },
-      {
-        text: "Attend AI startup lecture",
-        type: "recommendation"
-      }
-    ]);
-  }, []);
+  const recs = [
+    "Skip Friday party — exam next morning",
+    "Attend AI lecture — high value",
+    "You need 4h study time today"
+  ];
 
   return (
-    <div style={{ padding: 40 }}>
-      <h1>AI Recommendations</h1>
+    <DashboardLayout>
+      <h1 className="text-3xl font-bold mb-6">
+        AI Recommendations
+      </h1>
 
-      {recs.map((r, i) => (
-        <div key={i} style={{ marginBottom: 10 }}>
-          <b>{r.type}:</b> {r.text}
-        </div>
-      ))}
-    </div>
+      <div className="space-y-4">
+
+        {recs.map((r, i) => (
+          <div
+            key={i}
+            className="bg-white rounded-2xl p-5 shadow-sm border-l-4 border-primary"
+          >
+            {r}
+          </div>
+        ))}
+
+      </div>
+    </DashboardLayout>
   );
 }
