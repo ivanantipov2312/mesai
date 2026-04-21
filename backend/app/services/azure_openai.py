@@ -26,13 +26,13 @@ Give concise, actionable advice. Be encouraging but honest.
 Respond in the language the student writes to you in."""
 
 
-def chat_completion(messages: list, max_tokens: int = 400) -> str:
+def chat_completion(messages: list, max_tokens: int = 400, temperature: float = 1.0) -> str:
     client = get_client()
     resp = client.chat.completions.create(
         model=settings.AZURE_OPENAI_DEPLOYMENT,
         messages=messages,
         max_completion_tokens=max_tokens,
-        temperature=1.0,
+        temperature=temperature,
     )
     return resp.choices[0].message.content.strip()
 

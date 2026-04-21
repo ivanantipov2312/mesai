@@ -31,7 +31,7 @@ export default function Chat() {
         ...newMessages,
         {
           role: "assistant",
-          text: res.reply || "No response",
+          text: res.response || "No response",
         },
       ]);
     } catch (err) {
