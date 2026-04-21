@@ -9,6 +9,8 @@ from app.routes.skills import router as skills_router
 from app.routes.career import router as career_router
 from app.routes.ai import router as ai_router
 from app.routes.timetable import router as timetable_router
+from app.routes.calendar import router as calendar_router
+from app.routes.notification_settings import router as notification_settings_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -38,6 +40,8 @@ app.include_router(skills_router)
 app.include_router(career_router)
 app.include_router(ai_router)
 app.include_router(timetable_router)
+app.include_router(calendar_router)
+app.include_router(notification_settings_router)
 
 
 @app.get("/health")

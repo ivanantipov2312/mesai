@@ -7,7 +7,7 @@ import Dashboard from "./pages/Dashboard";
 import Calendar from "./pages/Calendar";
 import Courses from "./pages/Courses"
 import Assignments from "./pages/Assignments";
-import Events from "./pages/Events";
+import Settings from "./pages/Settings";
 import Recommendations from "./pages/Recommendations";
 import Onboarding from "./pages/Onboarding";
 import Chat from "./pages/Chat.jsx"
@@ -30,7 +30,7 @@ function App() {
         <Route path="/calendar" element={<Calendar />} />
 		<Route path="/courses" element={<Courses />} />
         <Route path="/assignments" element={<Assignments />} />
-        <Route path="/events" element={<Events />} />
+        <Route path="/settings" element={<Settings />} />
 		<Route path="/chat" element={<Chat />} />
         <Route path="/career" element={<Career />} />
         <Route path="/skills" element={<Skills />} />

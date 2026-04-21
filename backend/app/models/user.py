@@ -19,3 +19,5 @@ class User(Base):
 
     enrolled_courses = relationship("UserCourse", back_populates="user", cascade="all, delete-orphan")
     ai_cache_entries = relationship("AICache", back_populates="user", cascade="all, delete-orphan")
+    calendar_notes = relationship("CalendarNote", back_populates="user", cascade="all, delete-orphan")
+    notification_settings = relationship("NotificationSettings", back_populates="user", uselist=False, cascade="all, delete-orphan")

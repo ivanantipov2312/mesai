@@ -38,10 +38,6 @@ export default function Sidebar() {
           Assignments
         </NavLink>
 
-        <NavLink className={linkStyle} to="/events">
-          Events
-        </NavLink>
-
         <NavLink className={linkStyle} to="/career">
           Career
         </NavLink>
@@ -57,6 +53,10 @@ export default function Sidebar() {
 		<NavLink className={linkStyle} to="/chat">
 			AI Chat
 		</NavLink>
+
+        <NavLink className={linkStyle} to="/settings">
+          Settings
+        </NavLink>
       </nav>
 
 		{/* Logout Button Section */}
