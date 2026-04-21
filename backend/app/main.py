@@ -5,6 +5,7 @@ import app.models  # noqa: F401 — registers all models before create_all
 from app.seed import seed_database
 from app.routes.auth import router as auth_router
 from app.routes.courses import router as courses_router
+from app.routes.skills import router as skills_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -30,6 +31,7 @@ def on_startup():
 
 app.include_router(auth_router)
 app.include_router(courses_router)
+app.include_router(skills_router)
 
 
 @app.get("/health")
