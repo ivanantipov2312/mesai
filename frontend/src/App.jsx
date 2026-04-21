@@ -8,6 +8,7 @@ import Assignments from "./pages/Assignments";
 import Events from "./pages/Events";
 import Recommendations from "./pages/Recommendations";
 import Onboarding from "./pages/Onboarding";
+import Chat from "./pages/Chat.jsx"
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/assignments" element={<Assignments />} />
         <Route path="/events" element={<Events />} />
+		<Route path="/chat" element={<Chat />} />
         <Route path="/recommendations" element={<Recommendations />} />
 
       </Routes>
