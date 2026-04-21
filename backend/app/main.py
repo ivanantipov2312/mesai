@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.database import Base, engine
-import app.models  # noqa: F401 — ensures all models are registered before create_all
+from app.database import Base, engine, SessionLocal
+import app.models  # noqa: F401 — registers all models before create_all
+from app.seed import seed_database
 
 Base.metadata.create_all(bind=engine)
 
@@ -14,6 +15,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.on_event("startup")
+def on_startup():
+    db = SessionLocal()
+    try:
+        seed_database(db)
+    finally:
+        db.close()
 
 
 @app.get("/health")
