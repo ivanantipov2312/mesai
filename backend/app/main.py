@@ -6,6 +6,7 @@ from app.seed import seed_database
 from app.routes.auth import router as auth_router
 from app.routes.courses import router as courses_router
 from app.routes.skills import router as skills_router
+from app.routes.career import router as career_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -32,6 +33,7 @@ def on_startup():
 app.include_router(auth_router)
 app.include_router(courses_router)
 app.include_router(skills_router)
+app.include_router(career_router)
 
 
 @app.get("/health")
