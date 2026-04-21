@@ -26,7 +26,12 @@ Give concise, actionable advice. Be encouraging but honest.
 Respond in the language the student writes to you in."""
 
 
-def chat_completion(messages: list, max_tokens: int = 400, temperature: float = 1.0) -> str:
+def chat_completion(messages: list, max_tokens: int = 1200, temperature: float = 1.0) -> str:
+    """
+    gpt-5.4-nano is a reasoning model: it burns internal reasoning tokens before
+    producing output. max_completion_tokens covers reasoning + response combined,
+    so the budget must be large enough for both (~600 reasoning + ~600 response).
+    """
     client = get_client()
     resp = client.chat.completions.create(
         model=settings.AZURE_OPENAI_DEPLOYMENT,
@@ -34,7 +39,7 @@ def chat_completion(messages: list, max_tokens: int = 400, temperature: float = 
         max_completion_tokens=max_tokens,
         temperature=temperature,
     )
-    return resp.choices[0].message.content.strip()
+    return (resp.choices[0].message.content or "").strip()
 
 
 def build_student_context(user, enrolled_courses, skill_levels, top_careers) -> str:

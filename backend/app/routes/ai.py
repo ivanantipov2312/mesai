@@ -61,7 +61,7 @@ def chat(
         {"role": "system", "content": f"{SYSTEM_PROMPT}\n\n{context}"},
         {"role": "user", "content": body.message},
     ]
-    response = chat_completion(messages, max_tokens=400)
+    response = chat_completion(messages, max_tokens=1200)
     return ChatResponse(response=response)
 
 
@@ -89,7 +89,7 @@ def course_feedback(
         {"role": "system", "content": f"{SYSTEM_PROMPT}\n\n{context}"},
         {"role": "user", "content": prompt},
     ]
-    feedback = chat_completion(messages, max_tokens=200)
+    feedback = chat_completion(messages, max_tokens=800)
     return CourseFeedbackResponse(feedback=feedback, course_name=course.name)
 
 
@@ -113,6 +113,6 @@ def daily_tip(
             "Max 2 sentences."
         )},
     ]
-    tip = chat_completion(messages, max_tokens=100)
+    tip = chat_completion(messages, max_tokens=800)
     _set_cache(db, current_user.id, cache_key, tip)
     return DailyTipResponse(tip=tip, cached=False)
