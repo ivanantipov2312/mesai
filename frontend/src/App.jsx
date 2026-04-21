@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Login from "./pages/Login";
+import Register from "./pages/Register.jsx"
 import Dashboard from "./pages/Dashboard";
 import Calendar from "./pages/Calendar";
 import Assignments from "./pages/Assignments";
@@ -14,7 +15,8 @@ function App() {
       <Routes>
 
         {/* Public */}
-        <Route path="/login" element={<Login />} />
+        <Route path="/login" element={<Login />}/>
+		<Route path="/register" element={<Register />}/>
         <Route path="/onboarding" element={<Onboarding />} />
 
         {/* Protected */}
