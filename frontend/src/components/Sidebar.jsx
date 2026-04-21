@@ -32,6 +32,10 @@ export default function Sidebar() {
           AI Advice
         </NavLink>
 
+		<NavLink className={linkStyle} to="/chat">
+			AI Chat
+		</NavLink>
+
       </nav>
     </aside>
   );
