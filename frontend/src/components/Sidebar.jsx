@@ -20,6 +20,10 @@ export default function Sidebar() {
           Calendar
         </NavLink>
 
+		<NavLink className={linkStyle} to="/courses">
+			Courses
+		</NavLink>
+
         <NavLink className={linkStyle} to="/assignments">
           Assignments
         </NavLink>
