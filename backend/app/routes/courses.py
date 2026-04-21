@@ -7,6 +7,7 @@ from app.models.user_course import UserCourse
 from app.models.user import User
 from app.schemas.courses import CourseResponse, EnrollRequest, EnrolledCourseResponse, ConflictResponse
 from app.dependencies import get_current_user
+from app.services.course_service import enroll_student_in_db
 
 router = APIRouter(prefix="/api/courses", tags=["courses"])
 
@@ -56,23 +57,29 @@ def my_courses(current_user: User = Depends(get_current_user), db: Session = Dep
     )
 
 
+@router.get("/debug-catalog")
+def get_debug_catalog(db: Session = Depends(get_db)):
+    courses = db.query(Course).all()
+    # Format it exactly how the Agent needs to see it
+    return [f"ID {c.id}: {c.name} ({c.code})" for c in courses]
+
 @router.post("/enroll", response_model=EnrolledCourseResponse, status_code=status.HTTP_201_CREATED)
 def enroll(body: EnrollRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    course = db.query(Course).filter(Course.id == body.course_id).first()
-    if not course:
-        raise HTTPException(status_code=404, detail="Course not found")
-    already = (
-        db.query(UserCourse)
-        .filter(UserCourse.user_id == current_user.id, UserCourse.course_id == body.course_id)
-        .first()
+    result = enroll_student_in_db(
+        db=db, 
+        course_id=body.course_id, 
+        user_id=current_user.id
     )
-    if already:
+    
+    # 2. Handle the "already enrolled" case to match your 409 logic
+    if result["status"] == "already_enrolled":
         raise HTTPException(status_code=409, detail="Already enrolled")
-    uc = UserCourse(user_id=current_user.id, course_id=body.course_id)
-    db.add(uc)
-    db.commit()
-    db.refresh(uc)
-    return uc
+        
+    # 3. Return the data
+    # If your EnrolledCourseResponse expects the UserCourse (uc) object:
+    # Note: You might need to adjust your service to return the 'uc' object 
+    # instead of 'course' if your frontend needs the enrollment ID.
+    return result["course"]
 
 
 @router.delete("/unenroll/{course_id}", status_code=status.HTTP_204_NO_CONTENT)

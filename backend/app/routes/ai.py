@@ -13,6 +13,10 @@ from app.services.skill_mapper import compute_skill_levels
 from app.services.career_matcher import top_career_matches
 from app.models.career_path import CareerPath
 from app.dependencies import get_current_user
+from app.routes.courses import my_courses
+
+from app.agent.graph import agent_executor
+from langchain_core.messages import HumanMessage, SystemMessage
 
 router = APIRouter(prefix="/api/ai", tags=["ai"])
 
@@ -47,22 +51,50 @@ def _set_cache(db: Session, user_id: int, key: str, response: str):
     db.add(AICache(user_id=user_id, cache_key=key, response=response))
     db.commit()
 
-
-@router.post("/chat", response_model=ChatResponse)
-def chat(
-    body: ChatRequest,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+@router.post("/chat")
+async def chat_endpoint(
+    payload: dict, 
+    current_user = Depends(get_current_user), 
+    db: Session = Depends(get_db)
 ):
-    enrolled_courses, skill_levels, top_careers = _get_student_data(current_user, db)
-    context = build_student_context(current_user, enrolled_courses, skill_levels, top_careers)
+    user_message = payload.get("message")
+    if not user_message:
+        raise HTTPException(status_code=400, detail="No message provided")
 
-    messages = [
-        {"role": "system", "content": f"{SYSTEM_PROMPT}\n\n{context}"},
-        {"role": "user", "content": body.message},
-    ]
-    response = chat_completion(messages, max_tokens=1200)
-    return ChatResponse(response=response)
+    # 1. Fetch fresh data for context (the "Memory" of the agent)
+    enrolled = my_courses(current_user, db)
+    
+    # We'll use your existing context builder!
+    context_str = build_student_context(
+        user=current_user,
+        enrolled_courses=enrolled,
+        skill_levels={}, # Add if you have them
+        top_careers=[]   # Add if you have them
+    )
+
+    # 2. Prepare the Initial State
+    # We combine the SYSTEM_PROMPT with the real-time DB context
+    inputs = {
+        "messages": [
+            SystemMessage(content=f"{SYSTEM_PROMPT}\n\nCURRENT STUDENT CONTEXT:\n{context_str}"),
+            HumanMessage(content=user_message)
+        ]
+    }
+
+    config = {"configurable": {"user_id": current_user.id}}
+
+    # 3. Invoke the LangGraph Agent
+    # This will loop: Agent -> Tool -> Agent -> Final Answer
+    try:
+        result = agent_executor.invoke(inputs, config=config)
+        
+        # The last message in the state is the AI's final response
+        final_answer = result["messages"][-1].content
+        
+        return {"response": final_answer}
+    except Exception as e:
+        print(f"Agent Error: {e}")
+        raise HTTPException(status_code=500, detail="Agent failed to process request")
 
 
 @router.post("/course-feedback", response_model=CourseFeedbackResponse)
