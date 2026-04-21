@@ -32,7 +32,7 @@ def chat_completion(messages: list, max_tokens: int = 400) -> str:
         model=settings.AZURE_OPENAI_DEPLOYMENT,
         messages=messages,
         max_completion_tokens=max_tokens,
-        temperature=0.7,
+        temperature=1.0,
     )
     return resp.choices[0].message.content.strip()
 
