@@ -11,6 +11,11 @@ export async function loginUser(payload) {
 }
 
 export async function getMe() {
-	const response = await api.get("/api/auth/me");
-	return response.data;
+  const response = await api.get("/api/auth/me");
+  return response.data;
+}
+
+export async function updateMe(payload) {
+  const response = await api.patch("/api/auth/me", payload);
+  return response.data;
 }

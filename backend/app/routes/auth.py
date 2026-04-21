@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models.user import User
-from app.schemas.auth import RegisterRequest, LoginRequest, TokenResponse, UserResponse
+from app.schemas.auth import RegisterRequest, LoginRequest, TokenResponse, UserResponse, UpdateProfileRequest
 from app.utils.security import hash_password, verify_password, create_access_token
 from app.dependencies import get_current_user
 
@@ -38,4 +38,21 @@ def login(body: LoginRequest, db: Session = Depends(get_db)):
 
 @router.get("/me", response_model=UserResponse)
 def me(current_user: User = Depends(get_current_user)):
+    return current_user
+
+
+@router.patch("/me", response_model=UserResponse)
+def update_me(body: UpdateProfileRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    if body.name is not None:
+        current_user.name = body.name
+    if body.program is not None:
+        current_user.program = body.program
+    if body.semester is not None:
+        current_user.semester = body.semester
+    if body.career_interests is not None:
+        current_user.career_interests = body.career_interests
+    if body.existing_skills is not None:
+        current_user.existing_skills = body.existing_skills
+    db.commit()
+    db.refresh(current_user)
     return current_user

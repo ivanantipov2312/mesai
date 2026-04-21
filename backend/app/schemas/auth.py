@@ -23,6 +23,14 @@ class TokenResponse(BaseModel):
     token_type: str = "bearer"
 
 
+class UpdateProfileRequest(BaseModel):
+    name: Optional[str] = None
+    program: Optional[str] = None
+    semester: Optional[int] = None
+    career_interests: Optional[List[str]] = None
+    existing_skills: Optional[List[str]] = None
+
+
 class UserResponse(BaseModel):
     id: int
     email: str

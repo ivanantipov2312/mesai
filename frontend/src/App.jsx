@@ -11,6 +11,8 @@ import Events from "./pages/Events";
 import Recommendations from "./pages/Recommendations";
 import Onboarding from "./pages/Onboarding";
 import Chat from "./pages/Chat.jsx"
+import Career from "./pages/Career.jsx"
+import Skills from "./pages/Skills.jsx"
 
 function App() {
   return (
@@ -30,6 +32,8 @@ function App() {
         <Route path="/assignments" element={<Assignments />} />
         <Route path="/events" element={<Events />} />
 		<Route path="/chat" element={<Chat />} />
+        <Route path="/career" element={<Career />} />
+        <Route path="/skills" element={<Skills />} />
         <Route path="/recommendations" element={<Recommendations />} />
 		</Route>
 

@@ -42,6 +42,14 @@ export default function Sidebar() {
           Events
         </NavLink>
 
+        <NavLink className={linkStyle} to="/career">
+          Career
+        </NavLink>
+
+        <NavLink className={linkStyle} to="/skills">
+          Skills
+        </NavLink>
+
         <NavLink className={linkStyle} to="/recommendations">
           AI Advice
         </NavLink>
