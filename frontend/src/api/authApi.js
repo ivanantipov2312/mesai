@@ -10,14 +10,7 @@ export async function loginUser(payload) {
   return response.data;
 }
 
-export async function getMe(token) {
-  const response = await api.get("/api/auth/me", {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-	});
-
+export async function getMe() {
+	const response = await api.get("/api/auth/me");
 	return response.data;
 }
-
-
