@@ -44,9 +44,20 @@ export default function Courses() {
     }
   };
 
+  const [search, setSearch] = useState("");
+  const [semFilter, setSemFilter] = useState("");
+
   const isEnrolled = (courseId) => {
-    return myCourses.some((course) => course.id === courseId);
+    return myCourses.some((course) => course.course?.id === courseId);
   };
+
+  const filteredCourses = allCourses.filter((c) => {
+    const q = search.toLowerCase();
+    const matchText = !q || c.name.toLowerCase().includes(q) || c.code.toLowerCase().includes(q) ||
+      (c.skills_taught ?? []).some((s) => s.toLowerCase().includes(q));
+    const matchSem = !semFilter || String(c.semester) === semFilter;
+    return matchText && matchSem;
+  });
 
   const handleEnroll = async (courseId) => {
     try {
@@ -142,98 +153,132 @@ export default function Courses() {
                 </div>
               ) : (
                 <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-                  {myCourses.map((course) => (
-                    <div
-                      key={course.id}
-                      className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5"
-                    >
-                      <h3 className="text-lg font-semibold">
-                        {course.name}
-                      </h3>
-
-                      <p className="text-sm text-slate-500 mt-1">
-                        {course.code}
-                      </p>
-
-                      {course.description && (
-                        <p className="text-sm text-slate-600 mt-3">
-                          {course.description}
-                        </p>
-                      )}
-
-                      <button
-                        onClick={() => handleUnenroll(course.id)}
-                        disabled={actionLoading === course.id}
-                        className="mt-5 w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-xl transition disabled:opacity-60"
+                  {myCourses.map((enrollment) => {
+                    const c = enrollment.course;
+                    return (
+                      <div
+                        key={enrollment.id}
+                        className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5"
                       >
-                        {actionLoading === course.id
-                          ? "Removing..."
-                          : "Unenroll"}
-                      </button>
-                    </div>
-                  ))}
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <h3 className="text-lg font-semibold">{c.name}</h3>
+                            <p className="text-sm text-slate-500 mt-0.5">{c.code}</p>
+                          </div>
+                          {c.ects && (
+                            <span className="text-xs bg-indigo-50 text-primary px-2 py-1 rounded-full shrink-0">{c.ects} ECTS</span>
+                          )}
+                        </div>
+
+                        {c.description && (
+                          <p className="text-sm text-slate-600 mt-3 line-clamp-2">{c.description}</p>
+                        )}
+
+                        {(c.skills_taught ?? []).length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-3">
+                            {c.skills_taught.slice(0, 4).map((s) => (
+                              <span key={s} className="text-[10px] px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full font-mono">{s.replace(/_/g, " ")}</span>
+                            ))}
+                          </div>
+                        )}
+
+                        <button
+                          onClick={() => handleUnenroll(c.id)}
+                          disabled={actionLoading === c.id}
+                          className="mt-5 w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-xl transition disabled:opacity-60"
+                        >
+                          {actionLoading === c.id ? "Removing..." : "Unenroll"}
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </section>
 
             {/* All Courses */}
             <section>
-              <h2 className="text-xl font-semibold text-slate-800 mb-4">
-                All Courses
-              </h2>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
+                <h2 className="text-xl font-semibold text-slate-800">All Courses</h2>
+                <div className="flex gap-2 flex-1">
+                  <input
+                    type="text"
+                    placeholder="Search by name, code, or skill…"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="flex-1 border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  <select
+                    value={semFilter}
+                    onChange={(e) => setSemFilter(e.target.value)}
+                    className="border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    <option value="">All semesters</option>
+                    {[1,2,3,4,5,6,7,8].map((s) => (
+                      <option key={s} value={String(s)}>Sem {s}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {filteredCourses.length === 0 && (
+                <div className="bg-white rounded-2xl shadow-sm p-6 text-slate-400 text-sm">No courses match your search.</div>
+              )}
 
               <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {allCourses.map((course) => {
+                {filteredCourses.map((course) => {
                   const enrolled = isEnrolled(course.id);
 
                   return (
                     <div
                       key={course.id}
-                      className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5"
+                      className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 flex flex-col"
                     >
-                      <div className="flex justify-between gap-3">
+                      <div className="flex justify-between gap-3 mb-1">
                         <div>
-                          <h3 className="text-lg font-semibold">
-                            {course.name}
-                          </h3>
-
-                          <p className="text-sm text-slate-500 mt-1">
-                            {course.code}
-                          </p>
+                          <h3 className="text-base font-semibold text-slate-800">{course.name}</h3>
+                          <p className="text-xs text-slate-500 mt-0.5">{course.code}{course.semester ? ` · Sem ${course.semester}` : ""}</p>
                         </div>
-
-                        {enrolled && (
-                          <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full h-fit">
-                            Enrolled
-                          </span>
-                        )}
+                        <div className="flex flex-col items-end gap-1 shrink-0">
+                          {course.ects && (
+                            <span className="text-xs bg-indigo-50 text-primary px-2 py-0.5 rounded-full">{course.ects} ECTS</span>
+                          )}
+                          {enrolled && (
+                            <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">Enrolled</span>
+                          )}
+                        </div>
                       </div>
 
                       {course.description && (
-                        <p className="text-sm text-slate-600 mt-3">
-                          {course.description}
-                        </p>
+                        <p className="text-sm text-slate-600 mt-2 line-clamp-2 flex-1">{course.description}</p>
+                      )}
+
+                      {(course.skills_taught ?? []).length > 0 && (
+                        <div className="flex flex-wrap gap-1 mt-3">
+                          {course.skills_taught.slice(0, 5).map((s) => (
+                            <span key={s} className="text-[10px] px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full font-mono">{s.replace(/_/g, " ")}</span>
+                          ))}
+                          {course.skills_taught.length > 5 && (
+                            <span className="text-[10px] text-slate-400">+{course.skills_taught.length - 5}</span>
+                          )}
+                        </div>
                       )}
 
                       {!enrolled ? (
                         <button
                           onClick={() => handleEnroll(course.id)}
                           disabled={actionLoading === course.id}
-                          className="mt-5 w-full bg-primary text-white py-2 rounded-xl hover:opacity-90 transition disabled:opacity-60"
+                          className="mt-4 w-full bg-primary text-white py-2 rounded-xl hover:opacity-90 transition disabled:opacity-60 text-sm"
                         >
-                          {actionLoading === course.id
-                            ? "Enrolling..."
-                            : "Enroll"}
+                          {actionLoading === course.id ? "Enrolling..." : "Enroll"}
                         </button>
                       ) : (
                         <button
                           onClick={() => handleUnenroll(course.id)}
                           disabled={actionLoading === course.id}
-                          className="mt-5 w-full bg-slate-200 text-slate-800 py-2 rounded-xl hover:bg-slate-300 transition disabled:opacity-60"
+                          className="mt-4 w-full bg-slate-200 text-slate-800 py-2 rounded-xl hover:bg-slate-300 transition disabled:opacity-60 text-sm"
                         >
-                          {actionLoading === course.id
-                            ? "Updating..."
-                            : "Unenroll"}
+                          {actionLoading === course.id ? "Updating..." : "Unenroll"}
                         </button>
                       )}
                     </div>

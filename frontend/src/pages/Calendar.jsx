@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import DashboardLayout from "../layouts/DashboardLayout";
-import { getMyCourses } from "../api/courseApi";
+import { getMyCourses, getAllCourses, enrollCourse } from "../api/courseApi";
+import { api } from "../api/axios";
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri"];
 const DAY_NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
@@ -33,13 +34,57 @@ export default function Calendar() {
     const n = new Date(); n.setDate(1); n.setHours(0, 0, 0, 0); return n;
   });
   const [selectedDay, setSelectedDay] = useState(null);
+  const [showAddPanel, setShowAddPanel] = useState(false);
+  const [allCourses, setAllCourses] = useState([]);
+  const [panelLoading, setPanelLoading] = useState(false);
+  const [enrollingId, setEnrollingId] = useState(null);
+  const [exportingIcs, setExportingIcs] = useState(false);
+
+  const loadEnrollments = () =>
+    getMyCourses().then(setEnrollments).catch(console.error);
 
   useEffect(() => {
-    getMyCourses()
-      .then(setEnrollments)
-      .catch(console.error)
-      .finally(() => setLoading(false));
+    loadEnrollments().finally(() => setLoading(false));
   }, []);
+
+  const openAddPanel = () => {
+    setShowAddPanel(true);
+    if (allCourses.length === 0) {
+      setPanelLoading(true);
+      getAllCourses().then(setAllCourses).catch(console.error).finally(() => setPanelLoading(false));
+    }
+  };
+
+  const handlePanelEnroll = async (courseId) => {
+    setEnrollingId(courseId);
+    try {
+      await enrollCourse(courseId);
+      await loadEnrollments();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setEnrollingId(null);
+    }
+  };
+
+  const handleExportIcs = async () => {
+    setExportingIcs(true);
+    try {
+      const res = await api.get("/api/timetable/export.ics", { responseType: "blob" });
+      const url = URL.createObjectURL(new Blob([res.data], { type: "text/calendar" }));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "mesai-timetable.ics";
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setExportingIcs(false);
+    }
+  };
+
+  const enrolledIds = useMemo(() => new Set(enrollments.map((e) => e.course?.id)), [enrollments]);
 
   // Flatten all schedule slots into {course, slot} pairs
   const slots = useMemo(() =>
@@ -83,8 +128,8 @@ export default function Calendar() {
             <p className="text-slate-500 mt-1">Your weekly course schedule.</p>
           </div>
 
-          {/* View toggle */}
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2 items-center">
+            {/* View toggle */}
             {["week", "month"].map((v) => (
               <button
                 key={v}
@@ -96,8 +141,68 @@ export default function Calendar() {
                 {v}
               </button>
             ))}
+
+            <button
+              onClick={handleExportIcs}
+              disabled={exportingIcs}
+              className="px-4 py-2 rounded-xl text-sm font-medium bg-white text-slate-600 hover:bg-slate-100 transition border border-slate-200 disabled:opacity-50"
+            >
+              {exportingIcs ? "Exporting…" : "Export .ics"}
+            </button>
+
+            <button
+              onClick={openAddPanel}
+              className="px-4 py-2 rounded-xl text-sm font-medium bg-primary text-white hover:opacity-90 transition"
+            >
+              + Add Course
+            </button>
           </div>
         </div>
+
+        {/* Add Course slide-in panel */}
+        {showAddPanel && (
+          <div className="bg-white rounded-2xl shadow-sm p-5">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="font-semibold text-slate-800">Add a Course</h2>
+              <button onClick={() => setShowAddPanel(false)} className="text-slate-400 hover:text-slate-700 text-lg">×</button>
+            </div>
+            {panelLoading ? (
+              <p className="text-sm text-slate-400">Loading courses…</p>
+            ) : (
+              <div className="space-y-2 max-h-80 overflow-y-auto pr-1">
+                {allCourses.map((c) => {
+                  const enrolled = enrolledIds.has(c.id);
+                  return (
+                    <div key={c.id} className="flex items-center justify-between gap-3 p-3 rounded-xl border border-slate-100 hover:bg-slate-50">
+                      <div>
+                        <p className="text-sm font-medium text-slate-800">{c.name}</p>
+                        <p className="text-xs text-slate-400">{c.code}{c.ects ? ` · ${c.ects} ECTS` : ""}{c.semester ? ` · Sem ${c.semester}` : ""}</p>
+                        {(c.skills_taught ?? []).length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {c.skills_taught.slice(0, 3).map((s) => (
+                              <span key={s} className="text-[10px] px-1.5 py-0.5 bg-slate-100 text-slate-400 rounded-full font-mono">{s.replace(/_/g, " ")}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      {enrolled ? (
+                        <span className="text-xs text-green-600 font-medium shrink-0">Enrolled</span>
+                      ) : (
+                        <button
+                          onClick={() => handlePanelEnroll(c.id)}
+                          disabled={enrollingId === c.id}
+                          className="text-xs px-3 py-1.5 bg-primary text-white rounded-lg hover:opacity-90 transition disabled:opacity-50 shrink-0"
+                        >
+                          {enrollingId === c.id ? "…" : "Enroll"}
+                        </button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
 
         {loading && <div className="text-slate-400">Loading courses…</div>}
 
