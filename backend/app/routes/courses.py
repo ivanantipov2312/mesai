@@ -47,10 +47,11 @@ def list_courses(db: Session = Depends(get_db)):
     return db.query(Course).order_by(Course.code).all()
 
 
-@router.get("/my", response_model=List[EnrolledCourseResponse])
+@router.get("/my", response_model=List[CourseResponse]) # Use your Course schema, not Enrollment schema
 def my_courses(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     return (
-        db.query(UserCourse)
+        db.query(Course)
+        .join(UserCourse, UserCourse.course_id == Course.id)
         .filter(UserCourse.user_id == current_user.id)
         .all()
     )

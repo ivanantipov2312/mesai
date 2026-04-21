@@ -27,15 +27,13 @@ export const enrollCourse = async (courseId) => {
   return res.data;
 };
 
+export const unenrollCourse = async (courseId) => {
+  // Use a template literal to put the ID in the URL path
+  const res = await api.delete(`/api/courses/unenroll/${courseId}`);
+  return res.data;
+};
+
 /**
  * DELETE /api/courses/unenroll
  * body: { course_id }
  */
-export const unenrollCourse = async (courseId) => {
-  const res = await api.delete("/api/courses/unenroll", {
-    data: {
-      course_id: courseId,
-    },
-  });
-  return res.data;
-};

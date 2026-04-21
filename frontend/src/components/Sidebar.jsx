@@ -1,10 +1,20 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 export default function Sidebar() {
+	const navigate = useNavigate();
+
 	const linkStyle = ({ isActive }) =>
 		isActive
 			? "block bg-primary bg-primary rounded-xl px-4 py-3"
 			: "block px-4 py-3 hover:bg-white/10 rounded-x1"
+
+	const handleLogout = () => {
+		// 1. Clear your auth tokens (localStorage/Cookies)
+		localStorage.removeItem("token"); 
+    
+		// 2. Redirect to login page
+		navigate("/login");
+	};
 
   return (
     <aside className="w-72 bg-darknav text-white min-h-screen rounded-r-3xl p-6 shadow-xl">
@@ -39,8 +49,17 @@ export default function Sidebar() {
 		<NavLink className={linkStyle} to="/chat">
 			AI Chat
 		</NavLink>
-
       </nav>
+
+		{/* Logout Button Section */}
+      <div className="pt-6 border-t border-white/10">
+        <button
+          onClick={handleLogout}
+          className="w-full text-left px-4 py-3 text-red-400 hover:bg-red-500/10 rounded-xl transition-colors"
+        >
+          Logout
+        </button>
+      </div>
     </aside>
   );
 }
