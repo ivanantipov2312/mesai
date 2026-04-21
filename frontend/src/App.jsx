@@ -1,9 +1,11 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+import ProtectedRoute from "./components/ProtectedRoute"
 import Login from "./pages/Login";
 import Register from "./pages/Register.jsx"
 import Dashboard from "./pages/Dashboard";
 import Calendar from "./pages/Calendar";
+import Courses from "./pages/Courses"
 import Assignments from "./pages/Assignments";
 import Events from "./pages/Events";
 import Recommendations from "./pages/Recommendations";
@@ -21,12 +23,15 @@ function App() {
         <Route path="/onboarding" element={<Onboarding />} />
 
         {/* Protected */}
+	  <Route element={<ProtectedRoute /> }>
         <Route path="/" element={<Dashboard />} />
         <Route path="/calendar" element={<Calendar />} />
+		<Route path="/courses" element={<Courses />} />
         <Route path="/assignments" element={<Assignments />} />
         <Route path="/events" element={<Events />} />
 		<Route path="/chat" element={<Chat />} />
         <Route path="/recommendations" element={<Recommendations />} />
+		</Route>
 
       </Routes>
     </BrowserRouter>
