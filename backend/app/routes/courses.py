@@ -7,7 +7,7 @@ from app.models.user_course import UserCourse
 from app.models.user import User
 from app.schemas.courses import CourseResponse, EnrollRequest, EnrolledCourseResponse, ConflictResponse
 from app.dependencies import get_current_user
-from app.services.course_service import enroll_student_in_db
+from app.services.course_service import enroll_student_in_db, unenroll_student_from_db
 
 router = APIRouter(prefix="/api/courses", tags=["courses"])
 
@@ -79,21 +79,20 @@ def enroll(body: EnrollRequest, current_user: User = Depends(get_current_user), 
     # If your EnrolledCourseResponse expects the UserCourse (uc) object:
     # Note: You might need to adjust your service to return the 'uc' object 
     # instead of 'course' if your frontend needs the enrollment ID.
-    return result["course"]
+    return result["data"]
 
 
 @router.delete("/unenroll/{course_id}", status_code=status.HTTP_204_NO_CONTENT)
 def unenroll(course_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    uc = (
-        db.query(UserCourse)
-        .filter(UserCourse.user_id == current_user.id, UserCourse.course_id == course_id)
-        .first()
+    result = unenroll_student_from_db(
+        db=db, 
+        course_id=course_id, 
+        user_id=current_user.id
     )
-    if not uc:
-        raise HTTPException(status_code=404, detail="Enrollment not found")
-    db.delete(uc)
-    db.commit()
-
+    
+    # 2. Handle the "already enrolled" case to match your 409 logic
+    if result["status"] == "not_found":
+        raise HTTPException(status_code=409, detail="Not enrolled")
 
 @router.get("/conflicts", response_model=ConflictResponse)
 def check_conflicts(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
