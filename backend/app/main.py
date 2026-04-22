@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import text
 from app.database import Base, engine, SessionLocal
 import app.models  # noqa: F401 — registers all models before create_all
 from app.routes import assignments
@@ -34,6 +35,8 @@ app.add_middleware(
 def on_startup():
     db = SessionLocal()
     try:
+        db.execute(text("ALTER TABLE courses ADD COLUMN IF NOT EXISTS source VARCHAR DEFAULT 'taltech'"))
+        db.commit()
         seed_database(db)
     finally:
         db.close()

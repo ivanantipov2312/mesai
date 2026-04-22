@@ -15,5 +15,6 @@ class Course(Base):
     schedule = Column(JSON, default=list)       # [{day, start, end, type}]
     prerequisites = Column(JSON, default=list)  # [course_code, ...]
     skills_taught = Column(JSON, default=list)  # [skill_id, ...]
+    source = Column(String, nullable=False, default="taltech")  # taltech | euroteq | erasmus
 
     enrolled_by = relationship("UserCourse", back_populates="course", cascade="all, delete-orphan")

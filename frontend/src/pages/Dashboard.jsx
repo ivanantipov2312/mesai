@@ -8,6 +8,11 @@ import { getDailyTip, sendAIChat } from "../api/aiApi";
 import { getEvents } from "../api/eventsApi";
 import { createNote } from "../api/calendarApi";
 
+const stripMd = (s) =>
+  s.replace(/\*\*(.+?)\*\*/g, "$1").replace(/\*(.+?)\*/g, "$1")
+   .replace(/#{1,6}\s+/g, "").replace(/`([^`]+)`/g, "$1")
+   .replace(/\[(.+?)\]\(.+?\)/g, "$1").trim();
+
 const ECTS_TARGET = 180;
 
 export default function Dashboard() {
@@ -53,7 +58,7 @@ export default function Dashboard() {
     setLoadingCoach(true);
     try {
       const res = await sendAIChat(checkIn);
-      setCoaching(res.response ?? "");
+      setCoaching(stripMd(res.response ?? ""));
       setCheckIn("");
     } catch {
       setCoaching("Could not reach the AI — try again.");

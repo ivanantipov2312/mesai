@@ -408,6 +408,189 @@ COURSES = [
         "prerequisites": [],
         "skills_taught": ["project_management", "technical_writing", "presentation", "teamwork"],
     },
+
+    # --- EuroTeQ Coalition Courses ---
+    {
+        "code": "TUM-IN2346", "name": "Introduction to Deep Learning", "ects": 6,
+        "semester": "Spring",
+        "description": "Foundations of deep neural networks: CNNs, RNNs, Transformers, and training techniques. Offered by TU München.",
+        "schedule": [
+            {"day": "Monday", "start": "10:00", "end": "12:00", "type": "Lecture"},
+            {"day": "Wednesday", "start": "14:00", "end": "16:00", "type": "Lab"},
+        ],
+        "prerequisites": [],
+        "skills_taught": ["machine_learning", "python", "data_analysis"],
+        "source": "euroteq",
+    },
+    {
+        "code": "EPFL-CS451", "name": "Distributed Algorithms", "ects": 6,
+        "semester": "Fall",
+        "description": "Consensus, broadcast, fault tolerance, and distributed system design. Offered by EPFL.",
+        "schedule": [
+            {"day": "Tuesday", "start": "10:00", "end": "12:00", "type": "Lecture"},
+            {"day": "Thursday", "start": "14:00", "end": "16:00", "type": "Lab"},
+        ],
+        "prerequisites": [],
+        "skills_taught": ["algorithms", "python", "databases"],
+        "source": "euroteq",
+    },
+    {
+        "code": "DTU-02462", "name": "Machine Learning and Data Mining", "ects": 5,
+        "semester": "Fall",
+        "description": "Supervised and unsupervised learning, Bayesian methods, and model selection. Offered by DTU Copenhagen.",
+        "schedule": [
+            {"day": "Wednesday", "start": "08:00", "end": "10:00", "type": "Lecture"},
+            {"day": "Friday", "start": "12:00", "end": "14:00", "type": "Lab"},
+        ],
+        "prerequisites": [],
+        "skills_taught": ["machine_learning", "data_analysis", "data_visualization", "python"],
+        "source": "euroteq",
+    },
+    {
+        "code": "CTU-A7B36PJV", "name": "Java Enterprise Development", "ects": 6,
+        "semester": "Spring",
+        "description": "Enterprise Java with Spring Boot, REST APIs, microservices, and Docker deployment. Offered by CTU Prague.",
+        "schedule": [
+            {"day": "Monday", "start": "14:00", "end": "16:00", "type": "Lecture"},
+            {"day": "Wednesday", "start": "10:00", "end": "12:00", "type": "Lab"},
+        ],
+        "prerequisites": [],
+        "skills_taught": ["java", "devops", "containerization", "sql"],
+        "source": "euroteq",
+    },
+    {
+        "code": "TUE-2IO70", "name": "Embedded Systems Design", "ects": 5,
+        "semester": "Fall",
+        "description": "Real-time OS, hardware-software co-design, and low-power embedded programming. Offered by TU/e Eindhoven.",
+        "schedule": [
+            {"day": "Tuesday", "start": "08:00", "end": "10:00", "type": "Lecture"},
+            {"day": "Thursday", "start": "10:00", "end": "12:00", "type": "Lab"},
+        ],
+        "prerequisites": [],
+        "skills_taught": ["c_cpp", "os_internals", "linux_admin"],
+        "source": "euroteq",
+    },
+    {
+        "code": "TUM-IN2357", "name": "Machine Learning for Computer Vision", "ects": 6,
+        "semester": "Spring",
+        "description": "Object detection, image segmentation, and generative models for visual data. Offered by TU München.",
+        "schedule": [
+            {"day": "Friday", "start": "10:00", "end": "12:00", "type": "Lecture"},
+            {"day": "Friday", "start": "14:00", "end": "16:00", "type": "Lab"},
+        ],
+        "prerequisites": [],
+        "skills_taught": ["machine_learning", "python", "data_visualization"],
+        "source": "euroteq",
+    },
+    {
+        "code": "EPFL-CS523", "name": "Advanced Topics in Applied Cryptography", "ects": 4,
+        "semester": "Spring",
+        "description": "Zero-knowledge proofs, multi-party computation, and post-quantum cryptography. Offered by EPFL.",
+        "schedule": [
+            {"day": "Tuesday", "start": "14:00", "end": "16:00", "type": "Lecture"},
+        ],
+        "prerequisites": [],
+        "skills_taught": ["cryptography", "algorithms", "python"],
+        "source": "euroteq",
+    },
+    {
+        "code": "DTU-42621", "name": "Sustainable Digital Innovation", "ects": 5,
+        "semester": "Spring",
+        "description": "Digital business models, sustainable IT infrastructure, and green software engineering. Offered by DTU Copenhagen.",
+        "schedule": [
+            {"day": "Thursday", "start": "08:00", "end": "10:00", "type": "Lecture"},
+            {"day": "Thursday", "start": "12:00", "end": "14:00", "type": "Seminar"},
+        ],
+        "prerequisites": [],
+        "skills_taught": ["project_management", "cloud_computing", "technical_writing"],
+        "source": "euroteq",
+    },
+    {
+        "code": "CTU-B4M36DS2", "name": "Parallel and Distributed Computing", "ects": 6,
+        "semester": "Fall",
+        "description": "GPU programming, MPI, OpenMP, and large-scale distributed data processing. Offered by CTU Prague.",
+        "schedule": [
+            {"day": "Monday", "start": "16:00", "end": "18:00", "type": "Lecture"},
+            {"day": "Tuesday", "start": "16:00", "end": "18:00", "type": "Lab"},
+        ],
+        "prerequisites": [],
+        "skills_taught": ["algorithms", "c_cpp", "linux_admin", "python"],
+        "source": "euroteq",
+    },
+    {
+        "code": "TUE-2IMA15", "name": "Human-Computer Interaction", "ects": 5,
+        "semester": "Spring",
+        "description": "UX design, usability testing, accessibility, and interactive prototype development. Offered by TU/e Eindhoven.",
+        "schedule": [
+            {"day": "Wednesday", "start": "10:00", "end": "12:00", "type": "Lecture"},
+            {"day": "Wednesday", "start": "14:00", "end": "16:00", "type": "Seminar"},
+        ],
+        "prerequisites": [],
+        "skills_taught": ["javascript", "presentation", "teamwork", "technical_writing"],
+        "source": "euroteq",
+    },
+
+    # --- Erasmus Exchange Courses ---
+    {
+        "code": "ERS-SW401", "name": "Software Architecture Patterns", "ects": 6,
+        "semester": "Fall",
+        "description": "Microservices, event-driven design, CQRS, and architectural decision records. Exchange course (partner institution).",
+        "schedule": [
+            {"day": "Monday", "start": "10:00", "end": "12:00", "type": "Lecture"},
+            {"day": "Thursday", "start": "10:00", "end": "12:00", "type": "Seminar"},
+        ],
+        "prerequisites": [],
+        "skills_taught": ["python", "devops", "containerization", "databases"],
+        "source": "erasmus",
+    },
+    {
+        "code": "ERS-BD301", "name": "Big Data Analytics", "ects": 6,
+        "semester": "Spring",
+        "description": "Hadoop, Spark, Kafka, and real-time data pipeline design for large-scale datasets. Exchange course.",
+        "schedule": [
+            {"day": "Tuesday", "start": "12:00", "end": "14:00", "type": "Lecture"},
+            {"day": "Friday", "start": "10:00", "end": "12:00", "type": "Lab"},
+        ],
+        "prerequisites": [],
+        "skills_taught": ["data_analysis", "python", "sql", "databases"],
+        "source": "erasmus",
+    },
+    {
+        "code": "ERS-MOB201", "name": "Cross-Platform Mobile Development", "ects": 5,
+        "semester": "Spring",
+        "description": "React Native and Flutter for building iOS and Android applications with REST API integration. Exchange course.",
+        "schedule": [
+            {"day": "Wednesday", "start": "12:00", "end": "14:00", "type": "Lecture"},
+            {"day": "Friday", "start": "14:00", "end": "16:00", "type": "Lab"},
+        ],
+        "prerequisites": [],
+        "skills_taught": ["javascript", "python", "teamwork"],
+        "source": "erasmus",
+    },
+    {
+        "code": "ERS-SEC501", "name": "Enterprise Security Management", "ects": 6,
+        "semester": "Fall",
+        "description": "ISO 27001 implementation, risk management frameworks, and leading organizational security programs. Exchange course.",
+        "schedule": [
+            {"day": "Monday", "start": "12:00", "end": "14:00", "type": "Lecture"},
+            {"day": "Wednesday", "start": "16:00", "end": "18:00", "type": "Seminar"},
+        ],
+        "prerequisites": [],
+        "skills_taught": ["security_auditing", "threat_modeling", "ethical_hacking_law", "project_management"],
+        "source": "erasmus",
+    },
+    {
+        "code": "ERS-BI401", "name": "Business Intelligence and Data Warehousing", "ects": 5,
+        "semester": "Spring",
+        "description": "Data warehouse design, OLAP cubes, ETL pipelines, and Power BI dashboards. Exchange course.",
+        "schedule": [
+            {"day": "Thursday", "start": "14:00", "end": "16:00", "type": "Lecture"},
+            {"day": "Tuesday", "start": "08:00", "end": "10:00", "type": "Lab"},
+        ],
+        "prerequisites": [],
+        "skills_taught": ["sql", "data_analysis", "data_visualization", "databases"],
+        "source": "erasmus",
+    },
 ]
 
 # ---------------------------------------------------------------------------

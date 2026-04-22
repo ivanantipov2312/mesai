@@ -20,6 +20,7 @@ class CourseResponse(BaseModel):
     schedule: List[dict]
     prerequisites: List[str]
     skills_taught: List[str]
+    source: Optional[str] = "taltech"
 
     class Config:
         from_attributes = True
