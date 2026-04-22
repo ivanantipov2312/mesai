@@ -1,18 +1,22 @@
 import { useEffect, useState } from "react";
 import DashboardLayout from "../layouts/DashboardLayout";
 import CourseReviews from "../components/CourseReviews";
+import ConflictBanner from "../components/ConflictBanner";
 
 import {
   getAllCourses,
   getMyCourses,
   enrollCourse,
   unenrollCourse,
+  getConflicts,
 } from "../api/courseApi";
 
 export default function Courses() {
   const [allCourses, setAllCourses] = useState([]);
   const [myCourses, setMyCourses] = useState([]);
   const [reviewsCourse, setReviewsCourse] = useState(null);
+  const [conflicts, setConflicts] = useState([]);
+  const [conflictsDismissed, setConflictsDismissed] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
@@ -31,13 +35,15 @@ export default function Courses() {
       setLoading(true);
       setError("");
 
-      const [all, mine] = await Promise.all([
+      const [all, mine, conflictData] = await Promise.all([
         getAllCourses(),
         getMyCourses(),
+        getConflicts().catch(() => ({ conflicts: [] })),
       ]);
 
       setAllCourses(Array.isArray(all) ? all : []);
       setMyCourses(Array.isArray(mine) ? mine : []);
+      setConflicts(conflictData?.conflicts ?? []);
     } catch (err) {
       console.error(err);
       setError("Failed to load courses.");
@@ -128,6 +134,11 @@ export default function Courses() {
             Refresh
           </button>
         </div>
+
+        {/* Conflict warnings */}
+        {!conflictsDismissed && (
+          <ConflictBanner conflicts={conflicts} onDismiss={() => setConflictsDismissed(true)} />
+        )}
 
         {/* Error */}
         {error && (

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import DashboardLayout from "../layouts/DashboardLayout";
-import { getMyCourses, getAllCourses, enrollCourse } from "../api/courseApi";
+import { getMyCourses, getAllCourses, enrollCourse, getConflicts } from "../api/courseApi";
+import ConflictBanner from "../components/ConflictBanner";
 import { getNotes, createNote, updateNote, deleteNote } from "../api/calendarApi";
 import { api } from "../api/axios";
 
@@ -61,11 +62,18 @@ export default function Calendar() {
   const [noteSaving, setNoteSaving] = useState(false);
 
   const [exportingIcs, setExportingIcs] = useState(false);
+  const [conflicts, setConflicts] = useState([]);
+  const [conflictsDismissed, setConflictsDismissed] = useState(false);
 
   const loadData = async () => {
-    const [enrollData, notesData] = await Promise.all([getMyCourses(), getNotes()]);
+    const [enrollData, notesData, conflictData] = await Promise.all([
+      getMyCourses(),
+      getNotes(),
+      getConflicts().catch(() => ({ conflicts: [] })),
+    ]);
     setEnrollments(Array.isArray(enrollData) ? enrollData : []);
     setNotes(Array.isArray(notesData) ? notesData : []);
+    setConflicts(conflictData?.conflicts ?? []);
   };
 
   useEffect(() => { loadData().finally(() => setLoading(false)); }, []);
@@ -201,6 +209,11 @@ export default function Calendar() {
             </button>
           </div>
         </div>
+
+        {/* Conflict warnings */}
+        {!conflictsDismissed && (
+          <ConflictBanner conflicts={conflicts} onDismiss={() => setConflictsDismissed(true)} />
+        )}
 
         {/* Add Course panel */}
         {showAddPanel && (

@@ -13,7 +13,7 @@ from app.services.skill_mapper import compute_skill_levels
 from app.services.career_matcher import top_career_matches
 from app.models.career_path import CareerPath
 from app.dependencies import get_current_user
-from app.routes.courses import my_courses
+from app.routes.courses import my_courses, _find_conflicts
 
 from app.agent.graph import agent_executor
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -61,19 +61,33 @@ async def chat_endpoint(
     if not user_message:
         raise HTTPException(status_code=400, detail="No message provided")
 
-    # 1. Fetch fresh data for context (the "Memory" of the agent)
+    # 1. Fetch fresh data for context
     enrolled = my_courses(current_user, db)
 
-    # We'll use your existing context builder!
     context_str = build_student_context(
         user=current_user,
         enrolled_courses=enrolled,
-        skill_levels={}, # Add if you have them
-        top_careers=[]   # Add if you have them
+        skill_levels={},
+        top_careers=[],
     )
 
+    enrolled_course_models = [uc.course for uc in db.query(UserCourse).filter(UserCourse.user_id == current_user.id).all()]
+    conflicts = _find_conflicts(enrolled_course_models)
+    if conflicts:
+        conflict_lines = "\n".join(
+            f"- {c['course_a']['name']} and {c['course_b']['name']} overlap on {c['day']} at {c['overlap']}"
+            for c in conflicts
+        )
+        conflict_block = (
+            f"\n\nSCHEDULE CONFLICTS DETECTED ({len(conflicts)}):\n{conflict_lines}\n"
+            "When discussing the student's schedule, proactively warn about these conflicts and suggest "
+            "which course to prioritize based on their career goals and current skill levels."
+        )
+    else:
+        conflict_block = ""
+
     current_date_str = datetime.now().strftime("%A, %B %d, %Y")
-    full_instructions = f"{SYSTEM_PROMPT}\n\nTODAY'S DATE: {current_date_str}\n\nCURRENT STUDENT DATA:\n{context_str}"
+    full_instructions = f"{SYSTEM_PROMPT}\n\nTODAY'S DATE: {current_date_str}\n\nCURRENT STUDENT DATA:\n{context_str}{conflict_block}"
 
     # 2. Prepare the Initial State
     # We combine the SYSTEM_PROMPT with the real-time DB context

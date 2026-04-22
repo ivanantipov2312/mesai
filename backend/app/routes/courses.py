@@ -27,6 +27,10 @@ def _slots_overlap(slot_a: dict, slot_b: dict) -> bool:
     return a_start < b_end and b_start < a_end
 
 
+def _minutes_to_time(m: int) -> str:
+    return f"{m // 60:02d}:{m % 60:02d}"
+
+
 def _find_conflicts(courses: List[Course]) -> List[dict]:
     conflicts = []
     for i, ca in enumerate(courses):
@@ -34,11 +38,17 @@ def _find_conflicts(courses: List[Course]) -> List[dict]:
             for slot_a in (ca.schedule or []):
                 for slot_b in (cb.schedule or []):
                     if _slots_overlap(slot_a, slot_b):
+                        a_start = _time_to_minutes(slot_a["start"])
+                        a_end = _time_to_minutes(slot_a["end"])
+                        b_start = _time_to_minutes(slot_b["start"])
+                        b_end = _time_to_minutes(slot_b["end"])
+                        ov_start = _minutes_to_time(max(a_start, b_start))
+                        ov_end = _minutes_to_time(min(a_end, b_end))
                         conflicts.append({
                             "course_a": {"id": ca.id, "code": ca.code, "name": ca.name},
                             "course_b": {"id": cb.id, "code": cb.code, "name": cb.name},
                             "day": slot_a["day"],
-                            "time": f"{slot_a['start']}–{slot_a['end']}",
+                            "overlap": f"{ov_start}–{ov_end}",
                         })
     return conflicts
 

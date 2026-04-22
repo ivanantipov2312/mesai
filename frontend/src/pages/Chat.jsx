@@ -1,10 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import DashboardLayout from "../layouts/DashboardLayout";
 import ChatMessage from "../components/ChatMessage";
 import ChatInput from "../components/ChatInput";
 import { sendAIChat } from "../api/aiApi";
 
 export default function Chat() {
+  const location = useLocation();
+  const navigate = useNavigate();
+
   const [messages, setMessages] = useState([
     {
       role: "assistant",
@@ -13,6 +17,7 @@ export default function Chat() {
   ]);
 
   const [loading, setLoading] = useState(false);
+  const prefillHandled = useRef(false);
 
   const handleSend = async (text) => {
     // add user message
@@ -46,6 +51,15 @@ export default function Chat() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    const prefill = location.state?.prefill;
+    if (prefill && !prefillHandled.current) {
+      prefillHandled.current = true;
+      navigate("/chat", { replace: true, state: null });
+      handleSend(prefill);
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <DashboardLayout>

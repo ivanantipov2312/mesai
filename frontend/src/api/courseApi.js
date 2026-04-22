@@ -28,12 +28,11 @@ export const enrollCourse = async (courseId) => {
 };
 
 export const unenrollCourse = async (courseId) => {
-  // Use a template literal to put the ID in the URL path
   const res = await api.delete(`/api/courses/unenroll/${courseId}`);
   return res.data;
 };
 
-/**
- * DELETE /api/courses/unenroll
- * body: { course_id }
- */
+export const getConflicts = async () => {
+  const res = await api.get("/api/courses/conflicts");
+  return res.data;
+};
