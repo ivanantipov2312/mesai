@@ -15,6 +15,7 @@ from app.routes.notification_settings import router as notification_settings_rou
 from app.routes.programme import router as programme_router
 from app.routes.feedback import router as feedback_router
 from app.routes.assignments import router as assignment_router
+from app.routes.events import router as events_router
 
 Base.metadata.create_all(bind=engine)
 
@@ -49,6 +50,7 @@ app.include_router(notification_settings_router)
 app.include_router(programme_router)
 app.include_router(feedback_router)
 app.include_router(assignment_router)
+app.include_router(events_router)
 
 
 @app.get("/health")

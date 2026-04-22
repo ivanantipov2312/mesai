@@ -11,5 +11,6 @@ from app.models.feedback import CourseFeedback
 from app.models.chat_history import ChatHistory
 from app.models.programme import UserProgramme
 from app.models.syllabus import Syllabus
+from app.models.event import Event
 
-__all__ = ["User", "Course", "UserCourse", "Skill", "CareerPath", "AICache", "CalendarNote", "NotificationSettings", "CourseFeedback", "Assignment", "ChatHistory", "UserProgramme", "Syllabus"]
+__all__ = ["User", "Course", "UserCourse", "Skill", "CareerPath", "AICache", "CalendarNote", "NotificationSettings", "CourseFeedback", "Assignment", "ChatHistory", "UserProgramme", "Syllabus", "Event"]

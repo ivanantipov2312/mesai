@@ -91,9 +91,9 @@ export default function Career() {
                   const missingCount = Object.keys(m.missing_skills ?? {}).length;
                   return (
                     <button key={m.career.career_id} onClick={() => setSelectedId(m.career.career_id)}
-                      className={`text-left rounded-2xl p-5 shadow-sm border-2 transition ${isSelected ? "border-primary bg-indigo-50" : "border-transparent bg-white hover:border-slate-200"}`}>
+                      className={`text-left rounded-2xl p-5 shadow-sm border-2 transition ${isSelected ? "border-primary bg-indigo-50 dark:border-[#00ff41] dark:bg-[#0d4b3e]" : "border-transparent bg-white hover:border-slate-200"}`}>
                       <div className="flex items-center justify-between mb-3">
-                        <span className={`text-2xl font-bold ${isSelected ? "text-primary" : "text-slate-800"}`}>{m.match_pct}%</span>
+                        <span className={`text-2xl font-bold ${isSelected ? "text-primary dark:text-[#00ff41]" : "text-slate-800"}`}>{m.match_pct}%</span>
                         {m.career.entry_level && <span className="text-[10px] px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full font-medium">Entry level</span>}
                       </div>
                       <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden mb-3">
@@ -121,7 +121,7 @@ export default function Career() {
                     <h2 className="text-xl font-bold text-slate-800">{selectedMatch.career.title}</h2>
                     <p className="text-sm text-slate-500 mt-1">{selectedMatch.career.description}</p>
                   </div>
-                  <span className="text-3xl font-bold text-primary">{selectedMatch.match_pct}%</span>
+                  <span className="text-3xl font-bold text-primary dark:text-[#00ff41]">{selectedMatch.match_pct}%</span>
                 </div>
 
                 {Object.keys(selectedMatch.matched_skills ?? {}).length > 0 && (

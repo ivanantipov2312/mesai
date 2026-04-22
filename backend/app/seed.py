@@ -2,10 +2,12 @@
 Seed script — populates courses, skills, and career paths.
 Called on startup if tables are empty.
 """
+from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 from app.models.course import Course
 from app.models.skill import Skill
 from app.models.career_path import CareerPath
+from app.models.event import Event
 
 # ---------------------------------------------------------------------------
 # Skills
@@ -520,6 +522,90 @@ CAREERS = [
 # Seeding function
 # ---------------------------------------------------------------------------
 
+EVENTS = [
+    {
+        "title": "TalTech Career Fair 2026",
+        "date": datetime(2026, 5, 14, 10, 0, tzinfo=timezone.utc),
+        "location": "TalTech Main Building, U06a",
+        "description": "Meet 60+ employers from the IT and engineering sectors. Bring your CV and attend on-site interviews. Open to all TalTech students.",
+        "tags": ["career", "networking", "IT", "engineering"],
+        "source": "TalTech",
+    },
+    {
+        "title": "Erasmus+ Info Session — Study Abroad 2026/27",
+        "date": datetime(2026, 5, 7, 14, 0, tzinfo=timezone.utc),
+        "location": "TalTech Student Centre, Room 101",
+        "description": "Learn how to apply for Erasmus+ exchange, hear from returned students, and get advice from the International Office.",
+        "tags": ["erasmus", "exchange", "international", "study abroad"],
+        "source": "Erasmus",
+    },
+    {
+        "title": "CTF Competition: Cyber Siege 2026",
+        "date": datetime(2026, 5, 24, 9, 0, tzinfo=timezone.utc),
+        "location": "TalTech IT Lab, ICT-407",
+        "description": "48-hour capture the flag competition covering web, crypto, forensics, and pwn challenges. Open to all skill levels. Prizes for top 3 teams.",
+        "tags": ["CTF", "cybersecurity", "competition", "hacking"],
+        "source": "TalTech",
+    },
+    {
+        "title": "Docker & Kubernetes Hands-On Workshop",
+        "date": datetime(2026, 5, 21, 13, 0, tzinfo=timezone.utc),
+        "location": "TalTech IT Lab, ICT-312",
+        "description": "Practical 3-hour workshop on containerizing applications and deploying them to a local Kubernetes cluster. Bring your laptop.",
+        "tags": ["DevOps", "Docker", "Kubernetes", "workshop"],
+        "source": "TalTech",
+    },
+    {
+        "title": "Erasmus Partner University Fair",
+        "date": datetime(2026, 6, 4, 11, 0, tzinfo=timezone.utc),
+        "location": "TalTech Student Centre, Hall A",
+        "description": "Representatives from 30+ European partner universities present their programs. Perfect for planning your exchange semester.",
+        "tags": ["erasmus", "universities", "exchange", "international"],
+        "source": "Erasmus",
+    },
+    {
+        "title": "TalTech Open Day — IT & Engineering",
+        "date": datetime(2026, 5, 30, 10, 0, tzinfo=timezone.utc),
+        "location": "TalTech Campus, Ehitajate tee 5",
+        "description": "Annual open day with faculty tours, lab demos, and student project showcases. Great for networking and seeing cutting-edge research.",
+        "tags": ["open day", "networking", "campus", "research"],
+        "source": "TalTech",
+    },
+    {
+        "title": "Guest Lecture: AI in Cybersecurity",
+        "date": datetime(2026, 4, 29, 16, 0, tzinfo=timezone.utc),
+        "location": "TalTech ICT Building, Auditorium 1",
+        "description": "Industry expert from Guardtime discusses how AI and ML are reshaping threat detection and incident response in enterprise environments.",
+        "tags": ["AI", "cybersecurity", "lecture", "industry"],
+        "source": "Partner",
+    },
+    {
+        "title": "Spring Hackathon: Build for Estonia",
+        "date": datetime(2026, 6, 13, 9, 0, tzinfo=timezone.utc),
+        "location": "Garage48 Hub, Telliskivi 60a, Tallinn",
+        "description": "36-hour hackathon focused on civic tech and e-governance solutions. Teams of 2–5, mentors available. Prizes worth €5000.",
+        "tags": ["hackathon", "civic tech", "e-governance", "competition"],
+        "source": "Partner",
+    },
+    {
+        "title": "Data Science & Analytics Workshop",
+        "date": datetime(2026, 6, 10, 13, 0, tzinfo=timezone.utc),
+        "location": "TalTech IT Lab, ICT-210",
+        "description": "Hands-on session covering pandas, data visualization with Plotly, and building a simple ML pipeline. Python required.",
+        "tags": ["data science", "ML", "Python", "workshop"],
+        "source": "TalTech",
+    },
+    {
+        "title": "TalTech Alumni Networking Night",
+        "date": datetime(2026, 6, 25, 18, 0, tzinfo=timezone.utc),
+        "location": "Fotografiska Tallinn, Telliskivi 60a",
+        "description": "Evening networking event with TalTech alumni working in top tech companies. Informal setting, drinks provided. Register in advance.",
+        "tags": ["networking", "alumni", "career", "social"],
+        "source": "TalTech",
+    },
+]
+
+
 def seed_database(db: Session) -> None:
     if db.query(Skill).count() == 0:
         for s in SKILLS:
@@ -534,4 +620,9 @@ def seed_database(db: Session) -> None:
     if db.query(CareerPath).count() == 0:
         for cp in CAREERS:
             db.add(CareerPath(**cp))
+        db.commit()
+
+    if db.query(Event).count() == 0:
+        for ev in EVENTS:
+            db.add(Event(**ev))
         db.commit()
