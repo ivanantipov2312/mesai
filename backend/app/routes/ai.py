@@ -63,7 +63,7 @@ async def chat_endpoint(
 
     # 1. Fetch fresh data for context (the "Memory" of the agent)
     enrolled = my_courses(current_user, db)
-    
+
     # We'll use your existing context builder!
     context_str = build_student_context(
         user=current_user,
@@ -72,16 +72,20 @@ async def chat_endpoint(
         top_careers=[]   # Add if you have them
     )
 
+    current_date_str = datetime.now().strftime("%A, %B %d, %Y")
+    full_instructions = f"{SYSTEM_PROMPT}\n\nTODAY'S DATE: {current_date_str}\n\nCURRENT STUDENT DATA:\n{context_str}"
+
     # 2. Prepare the Initial State
     # We combine the SYSTEM_PROMPT with the real-time DB context
     inputs = {
         "messages": [
-            SystemMessage(content=f"{SYSTEM_PROMPT}\n\nCURRENT STUDENT CONTEXT:\n{context_str}"),
+            SystemMessage(content=full_instructions),
             HumanMessage(content=user_message)
         ]
     }
 
     config = {"configurable": {"user_id": current_user.id}}
+    current_date_str = datetime.now().strftime("%A, %B %d, %Y")
 
     # 3. Invoke the LangGraph Agent
     # This will loop: Agent -> Tool -> Agent -> Final Answer

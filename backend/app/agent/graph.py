@@ -2,7 +2,7 @@ from langgraph.graph import StateGraph, MessagesState, START, END
 from langgraph.prebuilt import ToolNode
 from langchain_openai import AzureChatOpenAI
 from app.config import settings
-from .tools import enroll_student_tool, unenroll_student_tool
+from .tools import create_calendar_note_tool, enroll_student_tool, unenroll_student_tool
 
 # 1. Setup the LLM with your Azure credentials
 llm = AzureChatOpenAI(
@@ -12,7 +12,7 @@ llm = AzureChatOpenAI(
     api_key=settings.AZURE_OPENAI_API_KEY,
 )
 
-tools = [enroll_student_tool, unenroll_student_tool]
+tools = [enroll_student_tool, unenroll_student_tool, create_calendar_note_tool]
 llm_with_tools = llm.bind_tools(tools)
 
 # 2. Define the nodes
