@@ -13,6 +13,7 @@ import Onboarding from "./pages/Onboarding";
 import Chat from "./pages/Chat.jsx"
 import Career from "./pages/Career.jsx"
 import Skills from "./pages/Skills.jsx"
+import Programme from "./pages/Programme.jsx"
 
 function App() {
   return (
@@ -34,6 +35,7 @@ function App() {
 		<Route path="/chat" element={<Chat />} />
         <Route path="/career" element={<Career />} />
         <Route path="/skills" element={<Skills />} />
+        <Route path="/programme" element={<Programme />} />
         <Route path="/recommendations" element={<Recommendations />} />
 		</Route>
 

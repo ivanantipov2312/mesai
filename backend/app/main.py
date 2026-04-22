@@ -12,6 +12,7 @@ from app.routes.ai import router as ai_router
 from app.routes.timetable import router as timetable_router
 from app.routes.calendar import router as calendar_router
 from app.routes.notification_settings import router as notification_settings_router
+from app.routes.programme import router as programme_router
 from app.routes.feedback import router as feedback_router
 from app.routes.assignments import router as assignment_router
 
@@ -45,6 +46,7 @@ app.include_router(ai_router)
 app.include_router(timetable_router)
 app.include_router(calendar_router)
 app.include_router(notification_settings_router)
+app.include_router(programme_router)
 app.include_router(feedback_router)
 app.include_router(assignment_router)
 

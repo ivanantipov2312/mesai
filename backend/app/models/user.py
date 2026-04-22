@@ -24,3 +24,5 @@ class User(Base):
     calendar_notes = relationship("CalendarNote", back_populates="user", cascade="all, delete-orphan")
     notification_settings = relationship("NotificationSettings", back_populates="user", uselist=False, cascade="all, delete-orphan")
     chat_history = relationship("ChatHistory", back_populates="user", cascade="all, delete-orphan", order_by="ChatHistory.created_at")
+    programme = relationship("UserProgramme", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    syllabi = relationship("Syllabus", back_populates="user", cascade="all, delete-orphan")
