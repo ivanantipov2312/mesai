@@ -16,7 +16,8 @@ class User(Base):
     career_interests = Column(JSON, default=list)
     existing_skills = Column(JSON, default=list)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-
+    
+    assignments = relationship("Assignment", back_populates="user", cascade="all, delete-orphan")
     enrolled_courses = relationship("UserCourse", back_populates="user", cascade="all, delete-orphan")
     ai_cache_entries = relationship("AICache", back_populates="user", cascade="all, delete-orphan")
     calendar_notes = relationship("CalendarNote", back_populates="user", cascade="all, delete-orphan")

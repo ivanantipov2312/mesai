@@ -5,6 +5,7 @@ from langchain_core.tools import tool
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools.base import InjectedToolArg # If this import fails, see below
 from app.database import SessionLocal
+from app.schemas.assignment import AssignmentCreate
 from app.services.calendar_service import create_calendar_note_db, delete_calendar_note_db
 from app.services.course_service import enroll_student_in_db
 
@@ -114,5 +115,31 @@ def delete_calendar_note_tool(query: str, config: Annotated[RunnableConfig, Inje
         if result["status"] == "success":
             return f"Successfully deleted '{result['title']}'. 🗑️"
         return result["message"]
+    finally:
+        db.close()
+
+@tool(args_schema=AssignmentCreate)
+def add_assignment_tool(
+    title: str, 
+    due_date: datetime.datetime, 
+    config: Annotated[RunnableConfig, InjectedToolArg],
+    risk_level: str = "Medium",
+    course_id: Optional[int] = None,
+    description: Optional[str] = None,
+):
+    """
+    Adds a single assignment to the student's tracker. 
+    Use this when the student identifies tasks, homework, or projects.
+    """
+    user_id = config.get("configurable", {}).get("user_id")
+    db = SessionLocal()
+    try:
+        from app.schemas.assignment import AssignmentCreate as AC
+        from app.services.assignment_service import create_assignment
+        
+        data = AC(title=title, due_date=due_date, risk_level=risk_level, course_id=course_id)
+        assignment = create_assignment(db, user_id, data)
+        
+        return f"Successfully tracked: {assignment.title} ({assignment.risk_level} Risk) due {assignment.due_date.strftime('%Y-%m-%d')}."
     finally:
         db.close()
