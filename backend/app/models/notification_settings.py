@@ -8,8 +8,9 @@ class NotificationSettings(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False)
-    method = Column(JSON, default=list)       # ["email", "sms", "in_app"]
+    method = Column(JSON, default=list)           # ["email", "sms", "in_app"]
     reminder_minutes = Column(Integer, default=15)
-    apply_to = Column(String, default="both") # "courses" | "notes" | "both"
+    reminder_frequency = Column(String, default="medium")  # "high" | "medium" | "low"
+    apply_to = Column(String, default="both")     # "courses" | "notes" | "both"
 
     user = relationship("User", back_populates="notification_settings")

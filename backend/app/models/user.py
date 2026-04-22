@@ -13,6 +13,7 @@ class User(Base):
     name = Column(String, nullable=False)
     program = Column(String, nullable=True)
     semester = Column(Integer, nullable=True)
+    phone = Column(String, nullable=True)
     career_interests = Column(JSON, default=list)
     existing_skills = Column(JSON, default=list)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
@@ -22,3 +23,4 @@ class User(Base):
     ai_cache_entries = relationship("AICache", back_populates="user", cascade="all, delete-orphan")
     calendar_notes = relationship("CalendarNote", back_populates="user", cascade="all, delete-orphan")
     notification_settings = relationship("NotificationSettings", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    chat_history = relationship("ChatHistory", back_populates="user", cascade="all, delete-orphan", order_by="ChatHistory.created_at")

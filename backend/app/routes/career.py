@@ -43,3 +43,80 @@ def career_match(
         )
         for m in matches
     ]
+
+
+import io
+from fastapi import UploadFile, File, Form
+from typing import Optional as Opt
+
+
+def _extract_text_from_file(file_bytes: bytes, filename: str) -> str:
+    name = (filename or "").lower()
+    if name.endswith(".pdf"):
+        try:
+            import pypdf
+            reader = pypdf.PdfReader(io.BytesIO(file_bytes))
+            return "\n".join(page.extract_text() or "" for page in reader.pages)
+        except Exception as e:
+            return f"[PDF parse error: {e}]"
+    elif name.endswith(".docx"):
+        try:
+            import docx
+            doc = docx.Document(io.BytesIO(file_bytes))
+            return "\n".join(p.text for p in doc.paragraphs)
+        except Exception as e:
+            return f"[DOCX parse error: {e}]"
+    else:
+        return file_bytes.decode("utf-8", errors="replace")
+
+
+CV_ANALYSIS_PROMPT = """Analyze the following CV/resume text. Return a structured plain-text analysis with these exact sections:
+
+SKILLS FOUND:
+List each skill on its own line with a bullet point.
+
+CAREER MATCHES:
+List the top 3 career matches from this list: SOC Analyst, Penetration Tester, Security Engineer, Software Developer, DevOps Engineer, Data Analyst, IT Systems Admin, Cloud Security Engineer.
+Format each as: Career Name — XX% match
+Explain briefly why.
+
+SKILL GAPS:
+List the most important missing skills for the top matched career.
+
+RECOMMENDED COURSES:
+From TalTech's offerings (ICS/ITC/ICA catalog), list 3-5 specific courses that would help close the gaps.
+
+Keep each section concise. Use plain text only, no markdown.
+
+CV TEXT:
+"""
+
+
+@router.post("/analyze-cv")
+async def analyze_cv(
+    file: Opt[UploadFile] = File(None),
+    text: Opt[str] = Form(None),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    from app.services.azure_openai import chat_completion, SYSTEM_PROMPT
+
+    if file and file.filename:
+        raw = await file.read()
+        cv_text = _extract_text_from_file(raw, file.filename)
+    elif text:
+        cv_text = text
+    else:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=400, detail="Provide a file or text")
+
+    if not cv_text.strip():
+        from fastapi import HTTPException
+        raise HTTPException(status_code=422, detail="Could not extract text from file")
+
+    messages = [
+        {"role": "system", "content": SYSTEM_PROMPT},
+        {"role": "user", "content": CV_ANALYSIS_PROMPT + cv_text[:6000]},
+    ]
+    analysis = chat_completion(messages, max_tokens=1400)
+    return {"analysis": analysis, "cv_length": len(cv_text)}

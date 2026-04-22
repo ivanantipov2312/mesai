@@ -45,6 +45,8 @@ def me(current_user: User = Depends(get_current_user)):
 def update_me(body: UpdateProfileRequest, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     if body.name is not None:
         current_user.name = body.name
+    if body.phone is not None:
+        current_user.phone = body.phone
     if body.program is not None:
         current_user.program = body.program
     if body.semester is not None:

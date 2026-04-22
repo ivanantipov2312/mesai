@@ -46,10 +46,6 @@ export default function Sidebar() {
           Skills
         </NavLink>
 
-        <NavLink className={linkStyle} to="/recommendations">
-          AI Advice
-        </NavLink>
-
 		<NavLink className={linkStyle} to="/chat">
 			AI Chat
 		</NavLink>

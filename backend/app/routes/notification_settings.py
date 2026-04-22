@@ -33,6 +33,7 @@ def update_notification_settings(
     ns = _get_or_create(current_user.id, db)
     ns.method = body.method
     ns.reminder_minutes = body.reminder_minutes
+    ns.reminder_frequency = body.reminder_frequency
     ns.apply_to = body.apply_to
     db.commit()
     db.refresh(ns)

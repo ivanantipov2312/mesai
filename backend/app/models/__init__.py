@@ -8,5 +8,6 @@ from app.models.ai_cache import AICache
 from app.models.calendar_note import CalendarNote
 from app.models.notification_settings import NotificationSettings
 from app.models.feedback import CourseFeedback
+from app.models.chat_history import ChatHistory
 
-__all__ = ["User", "Course", "UserCourse", "Skill", "CareerPath", "AICache", "CalendarNote", "NotificationSettings", "CourseFeedback", "Assignment"]
+__all__ = ["User", "Course", "UserCourse", "Skill", "CareerPath", "AICache", "CalendarNote", "NotificationSettings", "CourseFeedback", "Assignment", "ChatHistory"]

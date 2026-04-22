@@ -25,6 +25,7 @@ class TokenResponse(BaseModel):
 
 class UpdateProfileRequest(BaseModel):
     name: Optional[str] = None
+    phone: Optional[str] = None
     program: Optional[str] = None
     semester: Optional[int] = None
     career_interests: Optional[List[str]] = None
@@ -35,6 +36,7 @@ class UserResponse(BaseModel):
     id: int
     email: str
     name: str
+    phone: Optional[str] = None
     program: Optional[str]
     semester: Optional[int]
     career_interests: List[str]

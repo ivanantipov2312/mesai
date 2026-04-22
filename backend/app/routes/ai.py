@@ -14,6 +14,7 @@ from app.services.career_matcher import top_career_matches
 from app.models.career_path import CareerPath
 from app.dependencies import get_current_user
 from app.routes.courses import my_courses, _find_conflicts
+from app.models.chat_history import ChatHistory
 
 from app.agent.graph import agent_executor
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -51,19 +52,37 @@ def _set_cache(db: Session, user_id: int, key: str, response: str):
     db.add(AICache(user_id=user_id, cache_key=key, response=response))
     db.commit()
 
+@router.get("/chat/history")
+def chat_history_endpoint(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    rows = (
+        db.query(ChatHistory)
+        .filter(ChatHistory.user_id == current_user.id)
+        .order_by(ChatHistory.created_at.asc())
+        .limit(100)
+        .all()
+    )
+    return [{"role": r.role, "content": r.content, "created_at": r.created_at.isoformat()} for r in rows]
+
+
 @router.post("/chat")
 async def chat_endpoint(
-    payload: dict, 
-    current_user = Depends(get_current_user), 
-    db: Session = Depends(get_db)
+    payload: dict,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
 ):
     user_message = payload.get("message")
     if not user_message:
         raise HTTPException(status_code=400, detail="No message provided")
 
-    # 1. Fetch fresh data for context
-    enrolled = my_courses(current_user, db)
+    # Persist user message
+    db.add(ChatHistory(user_id=current_user.id, role="user", content=user_message))
+    db.commit()
 
+    # Fetch context
+    enrolled = my_courses(current_user, db)
     context_str = build_student_context(
         user=current_user,
         enrolled_courses=enrolled,
@@ -80,8 +99,7 @@ async def chat_endpoint(
         )
         conflict_block = (
             f"\n\nSCHEDULE CONFLICTS DETECTED ({len(conflicts)}):\n{conflict_lines}\n"
-            "When discussing the student's schedule, proactively warn about these conflicts and suggest "
-            "which course to prioritize based on their career goals and current skill levels."
+            "When discussing the student's schedule, proactively warn about these conflicts."
         )
     else:
         conflict_block = ""
@@ -89,26 +107,38 @@ async def chat_endpoint(
     current_date_str = datetime.now().strftime("%A, %B %d, %Y")
     full_instructions = f"{SYSTEM_PROMPT}\n\nTODAY'S DATE: {current_date_str}\n\nCURRENT STUDENT DATA:\n{context_str}{conflict_block}"
 
-    # 2. Prepare the Initial State
-    # We combine the SYSTEM_PROMPT with the real-time DB context
+    # Load last 10 history messages (excluding the one just saved)
+    history_rows = (
+        db.query(ChatHistory)
+        .filter(ChatHistory.user_id == current_user.id)
+        .order_by(ChatHistory.created_at.asc())
+        .limit(20)
+        .all()
+    )
+    history_messages = []
+    for row in history_rows[:-1]:  # exclude the just-added user message
+        if row.role == "user":
+            history_messages.append(HumanMessage(content=row.content))
+        else:
+            from langchain_core.messages import AIMessage
+            history_messages.append(AIMessage(content=row.content))
+
     inputs = {
         "messages": [
             SystemMessage(content=full_instructions),
-            HumanMessage(content=user_message)
+            *history_messages,
+            HumanMessage(content=user_message),
         ]
     }
 
     config = {"configurable": {"user_id": current_user.id}}
-    current_date_str = datetime.now().strftime("%A, %B %d, %Y")
 
-    # 3. Invoke the LangGraph Agent
-    # This will loop: Agent -> Tool -> Agent -> Final Answer
     try:
         result = agent_executor.invoke(inputs, config=config)
-        
-        # The last message in the state is the AI's final response
         final_answer = result["messages"][-1].content
-        
+        # Persist AI response
+        db.add(ChatHistory(user_id=current_user.id, role="assistant", content=final_answer))
+        db.commit()
         return {"response": final_answer}
     except Exception as e:
         print(f"Agent Error: {e}")
