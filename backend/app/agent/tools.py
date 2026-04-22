@@ -5,7 +5,7 @@ from langchain_core.tools import tool
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools.base import InjectedToolArg # If this import fails, see below
 from app.database import SessionLocal
-from app.services.calendar_service import create_calendar_note_db
+from app.services.calendar_service import create_calendar_note_db, delete_calendar_note_db
 from app.services.course_service import enroll_student_in_db
 
 class EnrollInput(BaseModel):
@@ -94,5 +94,25 @@ def create_calendar_note_tool(
         return f"Done! I've added '{note.title}' to your calendar for {note.start_time.strftime('%Y-%m-%d %H:%M')}. 📅"
     except Exception as e:
         return f"Error creating calendar note: {str(e)}"
+    finally:
+        db.close()
+
+class DeleteNoteInput(BaseModel):
+    query: str = Field(description="The title, part of the title, or ID of the note to delete.")
+
+@tool(args_schema=DeleteNoteInput)
+def delete_calendar_note_tool(query: str, config: Annotated[RunnableConfig, InjectedToolArg]):
+    """
+    Removes a note from the calendar. You can provide the name of the event 
+    or its ID. I will try to find the best match to delete.
+    """
+    user_id = config.get("configurable", {}).get("user_id")
+    db = SessionLocal()
+    try:
+        # Use the fuzzy match logic
+        result = delete_calendar_note_db(db, user_id, query)
+        if result["status"] == "success":
+            return f"Successfully deleted '{result['title']}'. 🗑️"
+        return result["message"]
     finally:
         db.close()
