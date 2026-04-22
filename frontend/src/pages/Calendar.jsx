@@ -39,6 +39,61 @@ const getDayName = (d) => { const dow = d.getDay(); return dow === 0 || dow === 
 
 const BLANK_NOTE = { title: "", description: "", color: "#6366F1", start_time: "", end_time: "" };
 
+const HOUR_PX = 60; // 1 px per minute
+const GRID_START = 8; // first hour shown
+const TOTAL_HEIGHT = HOURS.length * HOUR_PX; // 720 px
+
+function timeToMinutes(t) {
+  const [h, m] = t.split(":").map(Number);
+  return h * 60 + m;
+}
+
+// Assigns colIndex + totalCols to each slot so overlapping ones sit side-by-side.
+function computeSlotLayout(daySlots) {
+  if (daySlots.length === 0) return [];
+
+  const items = daySlots.map((s) => ({
+    ...s,
+    startMin: timeToMinutes(s.slot.start),
+    endMin: timeToMinutes(s.slot.end),
+    colIndex: 0,
+    totalCols: 1,
+  }));
+
+  items.sort((a, b) => a.startMin - b.startMin);
+
+  // Greedy column assignment: place each item in the earliest free column.
+  const colEnds = []; // colEnds[c] = endMin of last item placed in column c
+  for (const item of items) {
+    let placed = false;
+    for (let c = 0; c < colEnds.length; c++) {
+      if (colEnds[c] <= item.startMin) {
+        item.colIndex = c;
+        colEnds[c] = item.endMin;
+        placed = true;
+        break;
+      }
+    }
+    if (!placed) {
+      item.colIndex = colEnds.length;
+      colEnds.push(item.endMin);
+    }
+  }
+
+  // totalCols for each item = highest colIndex among all items it overlaps + 1.
+  for (const item of items) {
+    let maxCol = item.colIndex;
+    for (const other of items) {
+      if (other !== item && other.startMin < item.endMin && other.endMin > item.startMin) {
+        maxCol = Math.max(maxCol, other.colIndex);
+      }
+    }
+    item.totalCols = maxCol + 1;
+  }
+
+  return items;
+}
+
 export default function Calendar() {
   const [enrollments, setEnrollments] = useState([]);
   const [notes, setNotes] = useState([]);
@@ -147,6 +202,15 @@ export default function Calendar() {
   const slots = useMemo(() =>
     enrollments.flatMap((e) => (e.course?.schedule ?? []).map((slot) => ({ course: e.course, slot }))),
     [enrollments]);
+
+  // Per-day layout: colIndex + totalCols for overlap detection
+  const slotLayoutByDay = useMemo(() => {
+    const result = {};
+    for (const dayName of DAY_NAMES) {
+      result[dayName] = computeSlotLayout(slots.filter((s) => s.slot.day === dayName));
+    }
+    return result;
+  }, [slots]);
 
   // Notes for a given day name (weekly recurring display)
   const notesOnDay = (dayName) =>
@@ -283,44 +347,105 @@ export default function Calendar() {
                   })}
                 </div>
 
-                {/* Hour rows */}
-                {HOURS.map((h) => (
-                  <div key={h} className="grid grid-cols-[56px_repeat(5,1fr)] border-b border-slate-50 min-h-[52px]">
-                    <div className="text-xs text-slate-300 text-right pr-2 pt-1 select-none">{h}:00</div>
+                {/* Absolute-positioned time grid */}
+                <div className="overflow-y-auto max-h-[600px]">
+                  <div className="grid grid-cols-[56px_repeat(5,1fr)]" style={{ height: TOTAL_HEIGHT }}>
+
+                    {/* Time gutter */}
+                    <div className="relative h-full select-none">
+                      {HOURS.map((h) => (
+                        <div key={h} className="absolute right-2 text-xs text-slate-300 -translate-y-2"
+                          style={{ top: (h - GRID_START) * HOUR_PX }}>
+                          {h}:00
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* One column per day */}
                     {DAY_NAMES.map((dayName, di) => {
-                      const courseItems = slotsAt(dayName, h);
-                      const noteItems = notesAt(dayName, h);
                       const date = addDays(weekStart, di);
+                      const layoutItems = slotLayoutByDay[dayName] ?? [];
+                      const dayNotes = notesOnDay(dayName);
                       return (
                         <div key={dayName}
-                          className="border-l border-slate-50 p-0.5 space-y-0.5 cursor-pointer hover:bg-slate-50 transition group"
-                          onClick={(e) => { if (e.target === e.currentTarget || e.target.closest("[data-no-create]") === null) openCreateNote(dayName, h, date); }}>
-                          {courseItems.map(({ course, slot }, idx) => (
-                            <div key={idx} data-no-create="1"
-                              className={`rounded-md px-2 py-1 text-xs leading-snug ${TYPE_COLORS[slot.type] ?? "bg-indigo-100 text-indigo-800"}`}
-                              title={`${course.name} · ${slot.start}–${slot.end}`}>
-                              <div className="font-semibold truncate">{course.code}</div>
-                              <div className="opacity-80 truncate">{slot.start}–{slot.end} · {slot.type}</div>
-                            </div>
+                          className="relative h-full border-l border-slate-100 cursor-pointer"
+                          onClick={(e) => {
+                            if (!e.target.closest("[data-no-create]")) {
+                              const rect = e.currentTarget.getBoundingClientRect();
+                              const hour = Math.min(
+                                Math.max(Math.floor((e.clientY - rect.top) / HOUR_PX) + GRID_START, GRID_START),
+                                19
+                              );
+                              openCreateNote(dayName, hour, date);
+                            }
+                          }}>
+
+                          {/* Hour grid lines */}
+                          {HOURS.map((h) => (
+                            <div key={h} className="absolute w-full border-b border-slate-50 pointer-events-none"
+                              style={{ top: (h - GRID_START) * HOUR_PX, height: HOUR_PX }} />
                           ))}
-                          {noteItems.map((note) => (
-                            <div key={note.id} data-no-create="1"
-                              onClick={(e) => { e.stopPropagation(); openEditNote(note); }}
-                              className="rounded-md px-2 py-1 text-xs leading-snug text-white cursor-pointer hover:opacity-80 transition"
-                              style={{ backgroundColor: note.color }}
-                              title={note.title}>
-                              <div className="font-semibold truncate">{note.title}</div>
-                              <div className="opacity-80 truncate">{new Date(note.start_time).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
-                            </div>
-                          ))}
-                          {courseItems.length === 0 && noteItems.length === 0 && (
-                            <div className="invisible group-hover:visible text-[10px] text-slate-300 px-1">+ note</div>
-                          )}
+
+                          {/* Course blocks */}
+                          {layoutItems.map(({ course, slot, colIndex, totalCols }, idx) => {
+                            const startMin = timeToMinutes(slot.start);
+                            const endMin = timeToMinutes(slot.end);
+                            const top = startMin - GRID_START * 60;
+                            const height = endMin - startMin;
+                            const widthPct = 100 / totalCols;
+                            const leftPct = colIndex * widthPct;
+                            return (
+                              <div key={idx} data-no-create="1"
+                                className={`absolute rounded-md px-1.5 py-0.5 text-xs leading-snug overflow-hidden ${TYPE_COLORS[slot.type] ?? "bg-indigo-100 text-indigo-800"}`}
+                                style={{
+                                  top: top + 1,
+                                  height: Math.max(height - 2, 16),
+                                  left: `calc(${leftPct}% + 1px)`,
+                                  width: `calc(${widthPct}% - 2px)`,
+                                }}
+                                title={`${course.name} · ${slot.start}–${slot.end}`}>
+                                <div className="font-semibold truncate">{course.code}</div>
+                                {height >= 30 && (
+                                  <div className="opacity-80 truncate">{slot.start}–{slot.end} · {slot.type}</div>
+                                )}
+                              </div>
+                            );
+                          })}
+
+                          {/* Note blocks */}
+                          {dayNotes.map((note) => {
+                            const nd = parseNoteDate(note.start_time);
+                            const ed = parseNoteDate(note.end_time);
+                            const startMin = nd.getHours() * 60 + nd.getMinutes();
+                            const endMin = ed.getHours() * 60 + ed.getMinutes();
+                            const top = startMin - GRID_START * 60;
+                            const height = Math.max(endMin - startMin, 20);
+                            return (
+                              <div key={note.id} data-no-create="1"
+                                onClick={(e) => { e.stopPropagation(); openEditNote(note); }}
+                                className="absolute rounded-md px-1.5 py-0.5 text-xs leading-snug text-white cursor-pointer hover:opacity-80 transition overflow-hidden"
+                                style={{
+                                  top: top + 1,
+                                  height: height - 2,
+                                  left: 1,
+                                  right: 1,
+                                  backgroundColor: note.color,
+                                }}
+                                title={note.title}>
+                                <div className="font-semibold truncate">{note.title}</div>
+                                {height >= 30 && (
+                                  <div className="opacity-80 truncate">
+                                    {nd.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
                       );
                     })}
                   </div>
-                ))}
+                </div>
               </div>
             </div>
 
