@@ -6,5 +6,6 @@ from app.models.career_path import CareerPath
 from app.models.ai_cache import AICache
 from app.models.calendar_note import CalendarNote
 from app.models.notification_settings import NotificationSettings
+from app.models.feedback import CourseFeedback
 
-__all__ = ["User", "Course", "UserCourse", "Skill", "CareerPath", "AICache", "CalendarNote", "NotificationSettings"]
+__all__ = ["User", "Course", "UserCourse", "Skill", "CareerPath", "AICache", "CalendarNote", "NotificationSettings", "CourseFeedback"]

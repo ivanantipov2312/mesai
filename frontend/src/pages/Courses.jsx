@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import DashboardLayout from "../layouts/DashboardLayout";
+import CourseReviews from "../components/CourseReviews";
 
 import {
   getAllCourses,
@@ -11,6 +12,7 @@ import {
 export default function Courses() {
   const [allCourses, setAllCourses] = useState([]);
   const [myCourses, setMyCourses] = useState([]);
+  const [reviewsCourse, setReviewsCourse] = useState(null);
 
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
@@ -182,13 +184,21 @@ export default function Courses() {
                           </div>
                         )}
 
-                        <button
-                          onClick={() => handleUnenroll(c.id)}
-                          disabled={actionLoading === c.id}
-                          className="mt-5 w-full bg-red-500 hover:bg-red-600 text-white py-2 rounded-xl transition disabled:opacity-60"
-                        >
-                          {actionLoading === c.id ? "Removing..." : "Unenroll"}
-                        </button>
+                        <div className="mt-5 flex gap-2">
+                          <button
+                            onClick={() => handleUnenroll(c.id)}
+                            disabled={actionLoading === c.id}
+                            className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-xl transition disabled:opacity-60 text-sm"
+                          >
+                            {actionLoading === c.id ? "Removing..." : "Unenroll"}
+                          </button>
+                          <button
+                            onClick={() => setReviewsCourse(c)}
+                            className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm transition"
+                          >
+                            Reviews
+                          </button>
+                        </div>
                       </div>
                     );
                   })}
@@ -264,23 +274,31 @@ export default function Courses() {
                         </div>
                       )}
 
-                      {!enrolled ? (
+                      <div className="mt-4 flex gap-2">
+                        {!enrolled ? (
+                          <button
+                            onClick={() => handleEnroll(course.id)}
+                            disabled={actionLoading === course.id}
+                            className="flex-1 bg-primary text-white py-2 rounded-xl hover:opacity-90 transition disabled:opacity-60 text-sm"
+                          >
+                            {actionLoading === course.id ? "Enrolling..." : "Enroll"}
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleUnenroll(course.id)}
+                            disabled={actionLoading === course.id}
+                            className="flex-1 bg-slate-200 text-slate-800 py-2 rounded-xl hover:bg-slate-300 transition disabled:opacity-60 text-sm"
+                          >
+                            {actionLoading === course.id ? "Updating..." : "Unenroll"}
+                          </button>
+                        )}
                         <button
-                          onClick={() => handleEnroll(course.id)}
-                          disabled={actionLoading === course.id}
-                          className="mt-4 w-full bg-primary text-white py-2 rounded-xl hover:opacity-90 transition disabled:opacity-60 text-sm"
+                          onClick={() => setReviewsCourse(course)}
+                          className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm transition"
                         >
-                          {actionLoading === course.id ? "Enrolling..." : "Enroll"}
+                          Reviews
                         </button>
-                      ) : (
-                        <button
-                          onClick={() => handleUnenroll(course.id)}
-                          disabled={actionLoading === course.id}
-                          className="mt-4 w-full bg-slate-200 text-slate-800 py-2 rounded-xl hover:bg-slate-300 transition disabled:opacity-60 text-sm"
-                        >
-                          {actionLoading === course.id ? "Updating..." : "Unenroll"}
-                        </button>
-                      )}
+                      </div>
                     </div>
                   );
                 })}
@@ -289,6 +307,9 @@ export default function Courses() {
           </>
         )}
       </div>
+      {reviewsCourse && (
+        <CourseReviews course={reviewsCourse} onClose={() => setReviewsCourse(null)} />
+      )}
     </DashboardLayout>
   );
 }
